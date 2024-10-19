@@ -22,6 +22,12 @@ char* fragmentShaderSource = "./SHADERS/FRAGMENTSHADER.glsl";
 TSHADER *myShaders = NULL;
 SHADERPROGRAM shaderProgram;
 
+float vertices[] = {
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+};
+
 
 int main(int argv,char* argc[])
 {	//This is commentary added to tost git
@@ -44,18 +50,41 @@ int main(int argv,char* argc[])
 	printShaders(myShaders);
 	shaderProgram = createShaderProgram(&myShaders);
 
+
+	//lOAD VBOS AND VAOS
+	unsigned int VBO, VAO;
+	glGenBuffers(1,&VBO);
+	glGenVertexArrays(1,&VAO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER,VBO);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+	glEnableVertexAttribArray(0);
+
 	glfwSetFramebufferSizeCallback(mainWindow.window,frame_buffer_size_callback);
 	glViewport(0,0,mainWindow.width,mainWindow.height);//Set and start the rendering window for the current window that has been created
 
 	while(windowIsOpen(&mainWindow))
 	{
+		///Start drawing
 		glClearColor(0.2f,0.3f,0.3f,0.1f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glUseProgram(shaderProgram);
+
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES,0,sizeof(vertices));
+
+		//Change frame
 		glfwSwapBuffers(mainWindow.window);
 		glfwPollEvents();
 	}
 
 	stopWindow(&mainWindow);
+
+	//VAOS AND VBOS
+	glDeleteVertexArrays(1,&VAO);
+    	glDeleteBuffers(1,&VBO);
 
 	glfwTerminate();
 
