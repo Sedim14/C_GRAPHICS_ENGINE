@@ -1,7 +1,9 @@
 #include<glad/glad.h>
+#include<stdlib.h>
 #include<GLFW/glfw3.h>
 #include<stdbool.h>
 #include"window.h"
+#include"shader.h"
 
 Window mainWindow =
 {
@@ -13,19 +15,34 @@ Window mainWindow =
 
 void frame_buffer_size_callback(GLFWwindow* w,int width,int height);
 
+//Shader Paths
+char* vertexShaderSource = "./SHADERS/VERTEXSHADER.glsl";
+char* fragmentShaderSource = "./SHADERS/FRAGMENTSHADER.glsl";
+
+TSHADER *myShaders = NULL;
+SHADERPROGRAM shaderProgram;
+
+
 int main(int argv,char* argc[])
 {	//This is commentary added to tost git
 	glfwInit();
 	setWindowVersion(3);
 
 	if(!startWindow(&mainWindow))
-		return -1;
+		exit(-1);
 
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
        	{
           	printf("Failed to initialize GLAD\n");
-	 	 return -1;
+	 	 exit(-1);
       	}
+
+	
+	//Compile, Attach, and Create Shader Programs
+	addShader(&myShaders,GL_VERTEX_SHADER,vertexShaderSource);
+	addShader(&myShaders,GL_FRAGMENT_SHADER,fragmentShaderSource);
+	printShaders(myShaders);
+	shaderProgram = createShaderProgram(&myShaders);
 
 	glfwSetFramebufferSizeCallback(mainWindow.window,frame_buffer_size_callback);
 	glViewport(0,0,mainWindow.width,mainWindow.height);//Set and start the rendering window for the current window that has been created
@@ -42,7 +59,7 @@ int main(int argv,char* argc[])
 
 	glfwTerminate();
 
-	return 0;
+	exit(0);
 }
 
 
