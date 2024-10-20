@@ -7,6 +7,7 @@
 #include<GLFW/glfw3.h>
 #include<string.h>
 #include<stdbool.h>
+#include"Vector.h"
 
 //Linked list represents all the shaders that will compose the shader program
 typedef struct shader
@@ -28,4 +29,12 @@ void printShaders(TSHADER *head);
 //Functions for creating and manipulating a shader program
 SHADERPROGRAM createShaderProgram(TSHADER** shaders);//Attaches all shaders and links them
 void deleteShaderProgram(SHADERPROGRAM *program);
+void useShader(SHADERPROGRAM *program);
+
+//Manipulating our uniforms variable for shaders programs
+void setVector4f(SHADERPROGRAM *program,FVECTOR4D *vector,const char *uniform);
+void setVector4i(SHADERPROGRAM *program,IVECTOR4D *vector,const char *uniform);
+void setFloat(SHADERPROGRAM *program,float value,const char *uniform);
+void setInt(SHADERPROGRAM *program,int value,const char *uniform);
+void setBool(SHADERPROGRAM *program,bool value,const char *uniform);
 #endif

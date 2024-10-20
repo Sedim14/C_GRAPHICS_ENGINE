@@ -24,9 +24,14 @@ TSHADER *myShaders = NULL;
 SHADERPROGRAM shaderProgram;
 
 float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+	//Position	//Colors
+    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+     0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+};
+
+unsigned int indices[] ={
+	0, 1, 2
 };
 
 
@@ -53,19 +58,30 @@ int main(int argv,char* argc[])
 
 
 	//lOAD VBOS AND VAOS
-	unsigned int VBO, VAO;
+	unsigned int VBO, VAO, EBO;
 	glGenBuffers(1,&VBO);
 	glGenVertexArrays(1,&VAO);
+	glGenBuffers(1,&EBO);
+
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER,VBO);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
+
+	//Enabling attributes of the model
+	//Enabling position attribiute
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
+	//Enabling Color Attribute
+	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
+
 
 	glfwSetFramebufferSizeCallback(mainWindow.window,frame_buffer_size_callback);
 	glViewport(0,0,mainWindow.width,mainWindow.height);//Set and start the rendering window for the current window that has been created
 							   
-	glBindVertexArray(VAO);
 
 	while(windowIsOpen(&mainWindow))
 	{
@@ -81,8 +97,9 @@ int main(int argv,char* argc[])
 		glUniform4f(modifiedColor,0.0f,greenValue,0.0f,1.0f);
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES,0,sizeof(vertices));
-
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		//glDrawArrays(GL_TRIANGLES,0,sizeof(vertices));
+		glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 		//Change frame
 		glfwSwapBuffers(mainWindow.window);
 		glfwPollEvents();

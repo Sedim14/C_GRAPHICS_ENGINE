@@ -149,3 +149,64 @@ void printShaders(TSHADER *head) {
         head = head->next;
     }
 }
+
+void useSahder(SHADERPROGRAM *program)
+{
+	glUseProgram(*program);
+}
+
+//Uniform manipulations
+void setVector4f(SHADERPROGRAM *program,FVECTOR4D *vector,const char *uniform)
+{
+	int uniformLocation = glGetUniformLocation(*program,uniform);
+	if(uniformLocation==-1)
+	{
+		printf("ERROR:: %s uniform is not found on shader %d\n",uniform,program);
+		exit(-1);
+	}
+	glUniform4f(uniformLocation,vector->x,vector->y,vector->z,vector->w);
+}
+
+void setVector4i(SHADERPROGRAM *program,IVECTOR4D *vector,const char *uniform)
+{
+	int uniformLocation = glGetUniformLocation(*program,uniform);
+	if(uniformLocation==-1)
+	{
+		printf("ERROR:: %s uniform is not found on shader %d\n",uniform,program);
+		exit(-1);
+	}
+	glUniform4i(uniformLocation,vector->x,vector->y,vector->z,vector->w);
+}
+
+void setFloat(SHADERPROGRAM *program,float value,const char *uniform)
+{
+	int uniformLocation = glGetUniformLocation(*program,uniform);
+	if(uniformLocation==-1)
+	{
+		printf("ERROR:: %s uniform is not found on shader %d\n",uniform,program);
+		exit(-1);
+	}
+	glUniform1f(uniformLocation,value);
+}
+
+void setInt(SHADERPROGRAM *program,int value,const char *uniform)
+{
+	int uniformLocation = glGetUniformLocation(*program,uniform);
+	if(uniformLocation==-1)
+	{
+		printf("ERROR:: %s uniform is not found on shader %d\n",uniform,program);
+		exit(-1);
+	}
+	glUniform1i(uniformLocation,value);
+}
+
+void setBool(SHADERPROGRAM *program,bool value,const char *uniform)
+{
+	int uniformLocation = glGetUniformLocation(*program,uniform);
+	if(uniformLocation==-1)
+	{
+		printf("ERROR:: %s uniform is not found on shader %d\n",uniform,program);
+		exit(-1);
+	}
+	glUniform1f(uniformLocation,value);
+}
