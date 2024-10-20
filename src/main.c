@@ -4,6 +4,7 @@
 #include<stdbool.h>
 #include"window.h"
 #include"shader.h"
+#include<math.h>
 
 Window mainWindow =
 {
@@ -63,6 +64,8 @@ int main(int argv,char* argc[])
 
 	glfwSetFramebufferSizeCallback(mainWindow.window,frame_buffer_size_callback);
 	glViewport(0,0,mainWindow.width,mainWindow.height);//Set and start the rendering window for the current window that has been created
+							   
+	glBindVertexArray(VAO);
 
 	while(windowIsOpen(&mainWindow))
 	{
@@ -71,6 +74,11 @@ int main(int argv,char* argc[])
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
+		float timeValue = glfwGetTime();
+		float greenValue = sin(timeValue)/2.0f + 0.5f;
+		//printf("Green Value: %f\n",greenValue);
+		int modifiedColor = glGetUniformLocation(shaderProgram,"modifiedColor");
+		glUniform4f(modifiedColor,0.0f,greenValue,0.0f,1.0f);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES,0,sizeof(vertices));
