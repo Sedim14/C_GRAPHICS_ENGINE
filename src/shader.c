@@ -150,7 +150,7 @@ void printShaders(TSHADER *head) {
     }
 }
 
-void useSahder(SHADERPROGRAM *program)
+void useShader(SHADERPROGRAM *program)
 {
 	glUseProgram(*program);
 }
