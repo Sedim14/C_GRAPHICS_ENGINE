@@ -27,10 +27,10 @@ SHADERPROGRAM shaderProgram;
 
 float vertices[] = {
 	// positions          // colors           // texture coords
-     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f,   // top right
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   // bottom right
     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 2.0f    // top left
 };
 
 unsigned int indices[] ={
@@ -62,11 +62,12 @@ int main(int argv,char* argc[])
 
 	
 	//lOAD VBOS AND VAOS, and textures
-	unsigned int VBO, VAO, EBO, texture;
+	unsigned int VBO, VAO, EBO, texture1, texture2;
 	glGenBuffers(1,&VBO);
 	glGenVertexArrays(1,&VAO);
 	glGenBuffers(1,&EBO);
-	glGenTextures(1,&texture);
+	glGenTextures(1,&texture1);
+	glGenTextures(1,&texture2);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER,VBO);
@@ -74,17 +75,23 @@ int main(int argv,char* argc[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
 
-	glBindTexture(GL_TEXTURE_2D,texture);
+	/////Loading our textures
+	
+	//Texture1
+	glActiveTexture(GL_TEXTURE0); //Accesung texture unit 0
+	glBindTexture(GL_TEXTURE_2D,texture1);
 	//Setting texture wrapping and filtering options
 	// set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	//load and generate the texture
 	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char *data = stbi_load("./TEXTURES/container.jpg",&width,&height,&nrChannels,0);
+
 	if(data)
 	{
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
@@ -97,8 +104,35 @@ int main(int argv,char* argc[])
 	}
 
 	stbi_image_free(data);
+	
+	//Texture2
+	glActiveTexture(GL_TEXTURE1); //Accesung texture unit 1
+	glBindTexture(GL_TEXTURE_2D,texture2);
+	//Setting texture wrapping and filtering options
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//load and generate the texture
+	int width2, height2, nrChannels2;
+	unsigned char *data2 = stbi_load("./TEXTURES/awesomeface.png",&width2,&height2,&nrChannels2,0);
+	if(data2)
+	{
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width2,height2,0,GL_RGBA,GL_UNSIGNED_BYTE,data2);
+		glGenerateMipmap(GL_TEXTURE_2D);//RGBA is for reading images with alpha chanell correctly in opengl
+	}
+	else
+	{
+		printf("ERROR::Failed to load texture\n!!");
+		exit(-1);
+	}
+
+	stbi_image_free(data2);
 
 
+	/////////////////////////////
 	//Enabling attributes of the model
 	//Enabling position attribiute
 	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)0);
@@ -113,6 +147,13 @@ int main(int argv,char* argc[])
 
 	glfwSetFramebufferSizeCallback(mainWindow.window,frame_buffer_size_callback);
 	glViewport(0,0,mainWindow.width,mainWindow.height);//Set and start the rendering window for the current window that has been created
+	
+	//Using both shaders
+	useShader(&shaderProgram);
+	setInt(&shaderProgram,0,"texture1");
+	setInt(&shaderProgram,1,"texture2");
+
+							   
 							   
 
 	while(windowIsOpen(&mainWindow))
@@ -122,11 +163,6 @@ int main(int argv,char* argc[])
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		useShader(&shaderProgram);
-		float timeValue = glfwGetTime();
-		float greenValue = sin(timeValue)/2.0f + 0.5f;
-		//printf("Green Value: %f\n",greenValue);
-		int modifiedColor = glGetUniformLocation(shaderProgram,"modifiedColor");
-		glUniform4f(modifiedColor,0.0f,greenValue,0.0f,1.0f);
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
